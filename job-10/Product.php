@@ -45,18 +45,10 @@ class Product
     private int $quantity = 1;
     private DateTime $createdAt;
     private DateTime $updatedAt;
+    
 
-    public function __construct(
-        int $id,
-        string $name,
-        array $photos,
-        int $price,
-        string $description,
-        int $quantity,
-        DateTime $createdAt,
-        DateTime $updatedAt,
-        int $category_id
-    ) {
+    public function __construct(int $id, string $name, array $photos, int $price, string $description, int $quantity, DateTime $createdAt, DateTime $updatedAt, int $category_id)
+    {
         $this->id = $id;
         $this->name = $name;
         $this->photos = $photos;
@@ -84,7 +76,7 @@ class Product
         );
     }
 
-    // recup by id
+    //  récup id
     public function findOneById(int $id): Product|false
     {
         $pdo = Database::getConnexion();
@@ -96,7 +88,7 @@ class Product
             return false;
         }
 
-        // Hydratation instance
+        // Hydratation
         $hydrated = self::fromArray($row);
         $this->id = $hydrated->id;
         $this->name = $hydrated->name;
@@ -111,7 +103,22 @@ class Product
         return $this;
     }
 
-    // recup catégorie lié
+    // récup product lié
+    public static function findAll(): array
+    {
+        $pdo = Database::getConnexion();
+        $stmt = $pdo->query('SELECT * FROM product');
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $products = [];
+        foreach ($rows as $row) {
+            $products[] = self::fromArray($row);
+        }
+
+        return $products;
+    }
+
+    // récup catégorie lié
     public function getCategory(): ?Category
     {
         $pdo = Database::getConnexion();
@@ -205,5 +212,86 @@ class Product
     {
         $this->updatedAt = $updatedAt;
     }
+
+    public function create(): Product|false
+    {
+        $pdo = Database::getConnexion();
+
+        try {
+            $stmt = $pdo->prepare('
+            INSERT INTO product (name, photos, price, description, quantity, createdAt, updatedAt, category_id)
+            VALUES (:name, :photos, :price, :description, :quantity, :createdAt, :updatedAt, :category_id)
+        ');
+
+            $success = $stmt->execute([
+                'name' => $this->name,
+                'photos' => json_encode($this->photos, JSON_UNESCAPED_SLASHES),
+                'price' => $this->price,
+                'description' => $this->description,
+                'quantity' => $this->quantity,
+                'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
+                'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),
+                'category_id' => $this->category_id
+            ]);
+
+            if ($success) {
+                $this->id = (int)$pdo->lastInsertId();
+                return $this;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            echo "Erreur lors de l'insertion : " . $e->getMessage();
+            return false;
+        }
+    }
+
+    public function update(): Product|false
+{
+    // Vérifier que le produit a bien un ID existant
+    if ($this->id === 0) {
+        echo "Impossible de mettre à jour : ID manquant.";
+        return false;
+    }
+
+    $pdo = Database::getConnexion();
+
+    try {
+        $stmt = $pdo->prepare('
+            UPDATE product 
+            SET name = :name,
+                photos = :photos,
+                price = :price,
+                description = :description,
+                quantity = :quantity,
+                updatedAt = :updatedAt,
+                category_id = :category_id
+            WHERE id = :id
+        ');
+
+        $success = $stmt->execute([
+            'name' => $this->name,
+            'photos' => json_encode($this->photos, JSON_UNESCAPED_SLASHES),
+            'price' => $this->price,
+            'description' => $this->description,
+            'quantity' => $this->quantity,
+            'updatedAt' => (new DateTime())->format('Y-m-d H:i:s'), // on met à jour la date
+            'category_id' => $this->category_id,
+            'id' => $this->id
+        ]);
+
+        if ($success) {
+            echo "Produit mis à jour avec succès !<br>";
+            return $this;
+        } else {
+            echo "Erreur : mise à jour échouée.<br>";
+            return false;
+        }
+    } catch (PDOException $e) {
+        echo "Erreur lors de la mise à jour : " . $e->getMessage();
+        return false;
+    }
+}
+
 }
 

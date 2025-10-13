@@ -1,34 +1,20 @@
-<?php
+<?php require_once 'Product.php';
 
-class Product
+class Category
 {
     private int $id = 0;
-    private int $category_id;
     private string $name = ' ';
-    private array $photos;
-    private int $price = 0;
     private string $description = ' ';
-    private int $quantity = 1;
     private DateTime $createdAt;
     private DateTime $updatedAt;
 
-    public function __construct(int $id, string $name, array $photos, int $price, string $description, int $quantity, DateTime $createdAt, DateTime $updatedAt, int $category_id)
+    public function __construct(int $id, string $name, string $description, DateTime $createdAt, DateTime $updatedAt)
     {
         $this->id = $id;
         $this->name = $name;
-        $this->photos = $photos;
-        $this->price = $price;
         $this->description = $description;
-        $this->quantity = $quantity;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
-        $this->category_id = $category_id;
-    }
-
-    // Getter
-    public function GetCategoryId(): int
-    {
-        return $this->category_id;
     }
 
     public function GetId(): int
@@ -39,21 +25,9 @@ class Product
     {
         return $this->name;
     }
-    public function GetPhotos(): array
-    {
-        return $this->photos;
-    }
-    public function GetPrice(): int
-    {
-        return $this->price;
-    }
     public function GetDescription()
     {
         return $this->description;
-    }
-    public function GetQuantity()
-    {
-        return $this->quantity;
     }
     public function GetCreatedAt()
     {
@@ -64,11 +38,6 @@ class Product
         return $this->updatedAt;
     }
 
-    // Setter
-    public function setCategoryId(int $category_id): void
-    {
-         $this->category_id = $category_id;
-    }
     public function setId(int $id): void
     {
         $this->id = $id;
@@ -77,21 +46,9 @@ class Product
     {
         $this->name = $name;
     }
-    public function setPhotos(array $photos): void
-    {
-        $this->photos = $photos;
-    }
-    public function setPrice(int $price): void
-    {
-        $this->price = $price;
-    }
     public function setDescription(string $description): void
     {
         $this->description = $description;
-    }
-    public function setQuantity(int $quantity): void
-    {
-        $this->quantity = $quantity;
     }
     public function setCreatedAt(DateTime $createdAt): void
     {
@@ -102,5 +59,3 @@ class Product
         $this->updatedAt = $updatedAt;
     }
 }
-
-

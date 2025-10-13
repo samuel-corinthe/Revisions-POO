@@ -1,7 +1,7 @@
 <?php
 require_once 'Product.php'; 
+require_once 'Category.php';
 
-// Singleton
 $pdo = Database::getConnexion();
 
 // recup id 7

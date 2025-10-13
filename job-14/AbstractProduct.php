@@ -28,36 +28,26 @@ class Database
         return self::$instance;
     }
 
-    // raccourci
     public static function getConnexion(): PDO
     {
         return self::getInstance();
     }
 }
 
-class Product
+abstract class AbstractProduct
 {
-    private int $id = 0;
-    private int $category_id;
-    private string $name = ' ';
-    private array $photos = [];
-    private int $price = 0;
-    private string $description = ' ';
-    private int $quantity = 1;
-    private DateTime $createdAt;
-    private DateTime $updatedAt;
+    protected int $id = 0;
+    protected int $category_id;
+    protected string $name = '';
+    protected array $photos = [];
+    protected int $price = 0;
+    protected string $description = '';
+    protected int $quantity = 1;
+    protected DateTime $createdAt;
+    protected DateTime $updatedAt;
 
-    public function __construct(
-        int $id,
-        string $name,
-        array $photos,
-        int $price,
-        string $description,
-        int $quantity,
-        DateTime $createdAt,
-        DateTime $updatedAt,
-        int $category_id
-    ) {
+    public function __construct(int $id, string $name, array $photos, int $price, string $description, int $quantity, DateTime $createdAt, DateTime $updatedAt, int $category_id)
+    {
         $this->id = $id;
         $this->name = $name;
         $this->photos = $photos;
@@ -69,56 +59,30 @@ class Product
         $this->category_id = $category_id;
     }
 
-    // Hydratation
-    public static function fromArray(array $row): Product
-    {
-        return new Product(
-            (int) $row['id'],
-            (string) $row['name'],
-            json_decode($row['photos'], true) ?? [],
-            (int) $row['price'],
-            (string) $row['description'],
-            (int) $row['quantity'],
-            new DateTime($row['createdAt']),
-            new DateTime($row['updatedAt']),
-            (int) $row['category_id']
-        );
-    }
+    // méthode abstract instancié dans la classe fille
+    abstract public function create();
+    abstract public function update();
+    abstract public function findOneById(int $id);
+    abstract public static function fromArray(array $row);
 
-    // Récupérer un produit par ID
-    public static function findById(int $id): ?Product
-    {
-        $pdo = Database::getConnexion();
-        $stmt = $pdo->prepare('SELECT * FROM product WHERE id = :id');
-        $stmt->execute(['id' => $id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) return null;
-        return self::fromArray($row);
-    }
-
-    // Récupérer l'objet Category associé
+    // méthodes communes 
     public function getCategory(): ?Category
     {
         $pdo = Database::getConnexion();
         $stmt = $pdo->prepare('SELECT * FROM category WHERE id = :id');
         $stmt->execute(['id' => $this->category_id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) return null;
 
-        return new Category(
+        return $row ? new Category(
             (int)$row['id'],
             (string)$row['name'],
             (string)$row['description'],
             new DateTime($row['createdAt']),
             new DateTime($row['updatedAt'])
-        );
+        ) : null;
     }
 
-    // Getters
-    public function GetCategoryId(): int
-    {
-        return $this->category_id;
-    }
+    // Getters 
     public function GetId(): int
     {
         return $this->id;
@@ -135,28 +99,21 @@ class Product
     {
         return $this->price;
     }
-    public function GetDescription()
+    public function GetDescription(): string
     {
         return $this->description;
     }
-    public function GetQuantity()
+    public function GetQuantity(): int
     {
         return $this->quantity;
     }
-    public function GetCreatedAt()
+    public function GetCategoryId(): int
     {
-        return $this->createdAt;
-    }
-    public function GetUpdatedAt()
-    {
-        return $this->updatedAt;
+        return $this->category_id;
     }
 
-    // Setters
-    public function setCategoryId(int $category_id): void
-    {
-        $this->category_id = $category_id;
-    }
+
+    //Setters
     public function setId(int $id): void
     {
         $this->id = $id;
@@ -173,20 +130,17 @@ class Product
     {
         $this->price = $price;
     }
-    public function setDescription(string $description): void
+    public function setDescription(string $desc): void
     {
-        $this->description = $description;
+        $this->description = $desc;
     }
     public function setQuantity(int $quantity): void
     {
         $this->quantity = $quantity;
     }
-    public function setCreatedAt(DateTime $createdAt): void
+    public function setCategoryId(int $category_id): void
     {
-        $this->createdAt = $createdAt;
-    }
-    public function setUpdatedAt(DateTime $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
+        $this->category_id = $category_id;
     }
 }
+

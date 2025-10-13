@@ -1,7 +1,8 @@
 <?php
-require_once 'Product.php';
+require_once 'Product.php'; 
+require_once 'Category.php';
 
-// Récupérer la catégorie par ID (ici, ID 1 par exemple)
+// récup by id
 $pdo = Database::getConnexion();
 $stmt = $pdo->prepare('SELECT * FROM category WHERE id = :id');
 $stmt->execute(['id' => 1]);
@@ -20,7 +21,7 @@ $category = new Category(
     new DateTime($categoryData['updatedAt'])
 );
 
-// Récupérer tous les produits de la catégorie
+// récup all
 $products = $category->getProducts();
 
 echo "<h2>Catégorie : " . $category->GetName() . "</h2>";

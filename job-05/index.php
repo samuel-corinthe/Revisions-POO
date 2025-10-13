@@ -1,5 +1,6 @@
 <?php
 require_once 'Product.php'; 
+require_once 'Category.php';
 
 // Récupérer le produit ID 7 directement
 $product = Product::findById(7);
